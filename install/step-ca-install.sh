@@ -127,6 +127,6 @@ customize
 msg_info "Cleaning up"
 rm -f /tmp/step-cli_amd64.deb
 rm -f /tmp/step-ca_amd64.deb
-$STD apt-get -y autoremote
+$STD apt-get -y autoremove
 $STD apt-get -y autoclean
 msg_ok "Cleaned"
