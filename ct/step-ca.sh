@@ -28,19 +28,60 @@ function update_script() {
     header_info
     check_container_storage
     check_container_resources
+
+    # Check if installation is present
     if [[ ! -d /opt/step-ca ]]; then
         msg_error "No ${APP} Installation Found!"
         exit
     fi
-    msg_info "Updating ${APP}"
-    systemctl stop step-ca.service
-    curl https://dl.smallstep.com/cli/docs-ca-install/latest/step-cli_amd64.deb -o /tmp/step-cli_amd64.deb
-    curl https://dl.smallstep.com/cli/docs-ca-install/latest/step-ca_amd64.deb -o /tmp/step-ca_amd64.deb
-    dpkg -i /tmp/step-cli_amd64.deb
-    dpkg -i /tmp/step-ca_amd64.deb
-    rm /tmp/step-{cli,ca}_amd64.deb
-    systemctl start step-ca.service
-    msg_ok "Successfully Updated ${APP}"
+
+    # Crawling the new version and checking wheter an update is required
+    CLI_RELEASE=$(curl -s https://api.github.com/repos/smallstep/cli/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
+    if [[ "${CLI_RELEASE}" != "$(cat /opt/${APP}_version.txt | sed -n 's/step-cli=\([0-9\.]\)/\1/p')" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
+        msg_info "Updating ${APP} (step-cli) to v${CLI_RELEASE}"
+
+        wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
+        $STD dpkg -i /tmp/step-cli_amd64.deb
+
+        sed -i -e "s|^step-cli=.*|step-cli=$CLI_RELEASE|" "/opt/${APP}_version.txt"
+        msg_info "Updated ${APP} (step-cli) to v${CLI_RELEASE}"
+    else
+        msg_ok "No update required. ${APP} (step-cli) is already at v${CLI_RELEASE}"
+    fi
+
+    CA_RELEASE=$(curl -s https://api.github.com/repos/smallstep/certificates/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
+    if [[ "${CA_RELEASE}" != "$(cat /opt/${APP}_version.txt | sed -n 's/step-ca=\([0-9\.]\)/\1/p')" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
+        msg_info "Updating ${APP} (step-ca)"
+
+        # Stopping services
+        msg_info "Stopping ${APP}"
+        systemctl stop step-ca.service
+        msg_ok "Stopped ${APP}"
+    
+        # Execute Update
+        msg_info "Updating $APP to v${CA_RELEASE}"
+        wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CA_RELEASE}/step-ca_amd64.deb"
+        $STD dpkg -i /tmp/step-ca_amd64.deb
+
+        msg_ok "Updated $APP to v${CA_RELEASE}"
+
+        # Starting Services
+        msg_info "Starting $APP"
+        systemctl start step-ca.service
+        sleep 2
+        msg_ok "Started $APP"
+
+        # Cleaning up
+        msg_info "Cleaning Up"
+        rm /tmp/step-ca_amd64.deb
+        msg_ok "Cleanup completed"
+
+        # Last Action
+        sed -i -e "s|^step-ca=.*|step-ca=$CA_RELEASE|" "/opt/${APP}_version.txt"
+        msg_ok "Update Successful (step-ca)"
+    else
+        msg_ok "No update required. ${APP} (step-ca) is already at v${CA_RELEASE}"
+    fi
     exit
 }
 
