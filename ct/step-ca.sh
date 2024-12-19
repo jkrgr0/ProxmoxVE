@@ -40,7 +40,7 @@ function update_script() {
     if [[ "${CLI_RELEASE}" != "$(cat /opt/${APP}_version.txt | sed -n 's/step-cli=\([0-9\.]\)/\1/p')" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
         msg_info "Updating ${APP} (step-cli) to v${CLI_RELEASE}"
 
-        wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
+        wget -q -P /tmp "https://github.com/smallstep/cli/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
         $STD dpkg -i /tmp/step-cli_amd64.deb
 
         sed -i -e "s|^step-cli=.*|step-cli=$CLI_RELEASE|" "/opt/${APP}_version.txt"

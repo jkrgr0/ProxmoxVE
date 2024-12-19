@@ -22,7 +22,7 @@ msg_ok "Installed Dependencies"
 
 msg_info "Installing step-cli"
 CLI_RELEASE=$(curl -s https://api.github.com/repos/smallstep/cli/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
-wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
+wget -q -P /tmp "https://github.com/smallstep/cli/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
 $STD dpkg -i /tmp/step-cli_amd64.deb
 msg_ok "Installed step-cli"
 
