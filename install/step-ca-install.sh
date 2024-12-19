@@ -47,15 +47,16 @@ chown -R step:step /opt/step-ca
 msg_ok "Created Service User"
 
 msg_info "Generating password for CA keys and first provisioner"
-su step -c "openssl rand -base64 64 | tr -dc 'a-zA-z0-9' | head -c32 > /opt/step-ca/password.txt"
-chmod 600 /opt/step-ca/password.txt
+su -s /bin/bash -c "openssl rand -base64 64 | tr -dc 'a-zA-z0-9' | head -c32 > /opt/step-ca/password.txt" step
+su -s /bin/bash -c "chmod 600 /opt/step-ca/password.txt" step
 msg_ok "Generated password for CA keys and first provisioner"
 
 msg_info "Setup Step-CA"
-STEPPATH=/opt/step-ca sudo --preserve-env=STEPPATH -u step /bin/bash <<EOF
-step ca init --password-file=/opt/step-ca/password.txt \
-    --provisioner-password-file=/opt/step-ca/password.txt
-EOF
+STEPPATH=/opt/step-ca su \
+    -w STEPPATH \
+    -s /bin/bash \
+    -c "step ca init --password-file=/opt/step-ca/password.txt --provisioner-password-file=/opt/step-ca/password.txt" \
+    step
 msg_ok "Setup Step-CA"
 
 msg_info "Creating Service"
