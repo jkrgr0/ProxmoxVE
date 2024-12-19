@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -s https://raw.githubusercontent.com/jkrgr0/ProxmoxVE/feature/step-ca/misc/build.func)
 # Copyright (c) 2024 jkrgr0
 # Author: jkrgr
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
