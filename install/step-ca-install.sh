@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2024 jkrgr0
+# Copyright (c) 2021-2024 community-scripts ORG
 # Author: jkrgr0
 # License: MIT
 # https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 
+# Import Functions and Setup
 source /dev/stdin <<< "$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
@@ -13,31 +14,49 @@ setting_up_container
 network_check
 update_os
 
+msg_info "Installing Dependencies"
+$STD apt-get install -y \
+    curl \
+    openssl
+msg_ok "Installed Dependencies"
+
+msg_info "Installing step-cli"
+CLI_RELEASE=$(curl -s https://api.github.com/repos/smallstep/cli/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
+wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CLI_RELEASE}/step-cli_amd64.deb"
+$STD dpkg -i /tmp/step-cli_amd64.deb
+msg_ok "Installed step-cli"
+
 msg_info "Installing step-ca"
-curl -sL https://dl.smallstep.com/cli/docs-ca-install/latest/step-cli_amd64.deb -o /tmp/step-cli_amd64.deb
-curl -sL https://dl.smallstep.com/certificates/docs-ca-install/latest/step-ca_amd64.deb -o /tmp/step-ca_amd64.deb
-dpkg -i /tmp/step-cli_amd64.deb
-dpkg -i /tmp/step-ca_amd64.deb
+CA_RELEASE=$(curl -s https://api.github.com/repos/smallstep/certificates/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
+wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CA_RELEASE}/step-ca_amd64.deb"
+$STD dpkg -i /tmp/step-ca_amd64.deb
 msg_ok "Installed step-ca"
 
-msg_info "Create service user"
-useradd --user-group --system --home /etc/step-ca --shell /bin/false step
-setcap CAP_NET_BIND_SERVICE=+eip $(which step-ca)
-mkdir /etc/step-ca
-chown -R step:step /etc/step-ca
-msg_ok "Created service user"
+msg_info "Write Release File"
+cat <<EOF > "/opt/${APPLICATION}_version.txt"
+step-cli=${CLI_RELEASE}
+step-ca=${CA_RELEASE}
+EOF
+msg_ok "Written Release File"
+
+msg_info "Creating Service User"
+useradd --user-group --system --home /opt/step-ca --shell /bin/false step
+setcap CAP_NET_BIND_SERVICE=+eip "$(which step-ca)"
+mkdir /opt/step-ca
+chown -R step:step /opt/step-ca
+msg_ok "Created Service User"
 
 msg_info "Generating password for CA keys and first provisioner"
-su step -c "< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32} > /etc/step-ca/password.txt"
-chmod 600 /etc/step-ca/password.txt
+su step -c "openssl rand -base64 64 | tr -dc 'a-zA-z0-9' | head -c32 > /opt/step-ca/password.txt"
+chmod 600 /opt/step-ca/password.txt
 msg_ok "Generated password for CA keys and first provisioner"
 
-msg_info "Initialize CA"
-STEPPATH=/etc/step-ca su -w STEPPATH -s /bin/bash step
-step ca init --password-file=/etc/step-ca/password.txt \
-    --provisioner-password-file=/etc/step-ca/password.txt
-exit
-msg_ok "Initialized CA"
+msg_info "Setup Step-CA"
+STEPPATH=/opt/step-ca sudo --preserve-env=STEPPATH -u step /bin/bash <<EOF
+step ca init --password-file=/opt/step-ca/password.txt \
+    --provisioner-password-file=/opt/step-ca/password.txt
+EOF
+msg_ok "Setup Step-CA"
 
 msg_info "Creating Service"
 cat <<EOF >/etc/systemd/system/step-ca.service
@@ -49,15 +68,15 @@ After=network-online.target
 Wants=network-online.target
 StartLimitIntervalSec=30
 StartLimitBurst=3
-ConditionFileNotEmpty=/etc/step-ca/config/ca.json
-ConditionFileNotEmpty=/etc/step-ca/password.txt
+ConditionFileNotEmpty=/opt/step-ca/config/ca.json
+ConditionFileNotEmpty=/opt/step-ca/password.txt
 
 [Service]
 Type=simple
 User=step
 Group=step
-Environment=STEPPATH=/etc/step-ca
-WorkingDirectory=/etc/step-ca
+Environment=STEPPATH=/opt/step-ca
+WorkingDirectory=/opt/step-ca
 ExecStart=/usr/bin/step-ca config/ca.json --password-file password.txt
 ExecReload=/bin/kill --signal HUP $MAINPID
 Restart=on-failure
@@ -91,7 +110,7 @@ RestrictRealtime=true
 SystemCallFilter=@system-service
 SystemCallArchitectures=native
 MemoryDenyWriteExecute=true
-ReadWriteDirectories=/etc/step-ca/db
+ReadWriteDirectories=/opt/step-ca/db
 
 [Install]
 WantedBy=multi-user.target
