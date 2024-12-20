@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/jkrgr0/ProxmoxVE/refs/head/feature/2fauth/misc/build.func)
+source <(curl -s https://github.com/jkrgr0/ProxmoxVE/raw/refs/heads/feature/2fauth/misc/install.func)
 # Copyright (c) 2021-2024 community-scripts ORG
 # Author: jkrgr0
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
