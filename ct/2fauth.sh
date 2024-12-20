@@ -30,7 +30,7 @@ function update_script() {
     check_container_resources
 
     # Check if installation is present | -f for file, -d for folder
-    if [[ ! -d "/opt/${APP}" ]]; then
+    if [[ ! -d "/opt/${NSAPP}" ]]; then
         msg_error "No ${APP} Installation Found!"
         exit
     fi
@@ -45,8 +45,8 @@ function update_script() {
 
         # Creating Backup
         msg_info "Creating Backup"
-        mv "/opt/${APP}" "/opt/${APP}-backup"
-        # tar -czf "/opt/${APP}_backup_$(date +%F).tar.gz" "/opt/${APP}"
+        mv "/opt/${NSAPP}" "/opt/${NSAPP}-backup"
+        # tar -czf "/opt/${NSAPP}_backup_$(date +%F).tar.gz" "/opt/${NSAPP}"
         msg_ok "Backup Created"
 
         # Execute Update
@@ -54,12 +54,12 @@ function update_script() {
         wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
         unzip -q "${RELEASE}.zip"
         mv "${APPLICATION}-${RELEASE}/" "/opt/${APPLICATION}"
-        mv "/opt/${APP}-backup/.env" "/opt/${APP}/.env"
-        mv "/opt/${APP}-backup/storage" "/opt/${APP}/storage"
-        cd "/opt/${APP}" || return
+        mv "/opt/${NSAPP}-backup/.env" "/opt/${NSAPP}/.env"
+        mv "/opt/${NSAPP}-backup/storage" "/opt/${NSAPP}/storage"
+        cd "/opt/${NSAPP}" || return
 
-        chown -R www-data: "/opt/${APP}"
-        chmod -R 755 "/opt/${APP}"
+        chown -R www-data: "/opt/${NSAPP}"
+        chmod -R 755 "/opt/${NSAPP}"
 
         export COMPOSER_ALLOW_SUPERUSER=1
         composer install --no-dev --prefer-source &>/dev/null

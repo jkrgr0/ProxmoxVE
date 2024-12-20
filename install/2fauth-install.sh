@@ -49,9 +49,9 @@ msg_info "Setup ${APPLICATION}"
 RELEASE=$(curl -s https://api.github.com/repos/Bubka/2FAuth/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) }')
 wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
 unzip -q "${RELEASE}.zip"
-mv "${APPLICATION}-${RELEASE}/" "/opt/${APPLICATION}"
+mv "${APPLICATION}-${RELEASE}/" "/opt/${NSAPP}"
 
-cd "/opt/${APP}" || return
+cd "/opt/${NSAPP}" || return
 cp .env.example .env
 IPADDRESS=$(hostname -I | awk '{print $1}')
 
@@ -63,8 +63,8 @@ sed -i -e "s|^APP_URL=.*|APP_URL=http://$IPADDRESS|" \
        -e "s|^DB_USERNAME=$|DB_USERNAME=$DB_USER|" \
        -e "s|^DB_PASSWORD=$|DB_PASSWORD=$DB_PASS|" .env
 
-chown -R www-data: "/opt/${APPLICATION}"
-chmod -R 755 "/opt/${APPLICATION}"
+chown -R www-data: "/opt/${NSAPP}"
+chmod -R 755 "/opt/${NSAPP}"
 
 export COMPOSER_ALLOW_SUPERUSER=1
 $STD composer update --no-plugins --no-scripts
@@ -77,15 +77,15 @@ $STD php artisan passport:install
 $STD php artisan storage:link
 $STD php artisan config:cache
 
-echo "${RELEASE}" >"/opt/${APPLICATION}_version.txt"
-msg_ok "Setup ${APPLICATION}"
+echo "${RELEASE}" >"/opt/${NSAPP}_version.txt"
+msg_ok "Setup ${NSAPP}"
 
 # Configure Service (NGINX)
 msg_info "Configure Service"
 cat <<EOF >/etc/nginx/conf.d/2fauth.conf
 server {
         listen 80;
-        root /opt/${APPLICATION}/public;
+        root /opt/${NSAPP}/public;
         server_name $IPADDRESS;
         index index.php;
         charset utf-8;
