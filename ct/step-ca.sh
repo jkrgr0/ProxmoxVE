@@ -35,7 +35,7 @@ function update_script() {
         exit
     fi
 
-    # Crawling the new version and checking wheter an update is required
+    # Get the latest step-cli release and update if required
     CLI_RELEASE=$(curl -s https://api.github.com/repos/smallstep/cli/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
     if [[ "${CLI_RELEASE}" != "$(cat /opt/${APP}_version.txt | sed -n 's/step-cli=\([0-9\.]\)/\1/p')" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
         msg_info "Updating ${APP} (step-cli) to v${CLI_RELEASE}"
@@ -49,9 +49,10 @@ function update_script() {
         msg_ok "No update required. ${APP} (step-cli) is already at v${CLI_RELEASE}"
     fi
 
+    # Get the latest step-ca release and update if required
     CA_RELEASE=$(curl -s https://api.github.com/repos/smallstep/certificates/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
     if [[ "${CA_RELEASE}" != "$(cat /opt/${APP}_version.txt | sed -n 's/step-ca=\([0-9\.]\)/\1/p')" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
-        msg_info "Updating ${APP} (step-ca)"
+        msg_info "Updating ${APP} (step-ca) to v${CA_RELEASE}"
 
         # Stopping services
         msg_info "Stopping ${APP}"
@@ -59,11 +60,11 @@ function update_script() {
         msg_ok "Stopped ${APP}"
     
         # Execute Update
-        msg_info "Updating $APP to v${CA_RELEASE}"
+        msg_info "Updating $APP"
         wget -q -P /tmp "https://github.com/smallstep/certificates/releases/download/v${CA_RELEASE}/step-ca_amd64.deb"
         $STD dpkg -i /tmp/step-ca_amd64.deb
 
-        msg_ok "Updated $APP to v${CA_RELEASE}"
+        msg_ok "Updated $APP"
 
         # Starting Services
         msg_info "Starting $APP"
@@ -78,7 +79,7 @@ function update_script() {
 
         # Last Action
         sed -i -e "s|^step-ca=.*|step-ca=$CA_RELEASE|" "/opt/${APP}_version.txt"
-        msg_ok "Update Successful (step-ca)"
+        msg_ok "Updated ${APP} (step-ca) to v${CA_RELEASE}"
     else
         msg_ok "No update required. ${APP} (step-ca) is already at v${CA_RELEASE}"
     fi
@@ -92,4 +93,4 @@ description
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
 echo -e "${INFO}${YW} Access it using the following URL:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:3000${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:443${CL}"
