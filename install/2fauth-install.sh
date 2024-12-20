@@ -22,7 +22,7 @@ $STD apt-get install -y \
   mc \
   nginx \
   composer \
-  php8.2-{bcmath,common,ctype,fileinfo,mbstring,mysql,xml,cli} \
+  php8.2-{bcmath,common,ctype,curl,fileinfo,mbstring,mysql,xml,cli} \
   mariadb-server
 msg_ok "Installed Dependencies"
 
