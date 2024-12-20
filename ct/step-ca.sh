@@ -7,7 +7,7 @@ source <(curl -s https://raw.githubusercontent.com/jkrgr0/ProxmoxVE/refs/heads/f
 
 # App Default Values
 APP="Step-CA"
-var_tags="ca"
+var_tags="pki;acme"
 var_cpu="1"
 var_ram="512"
 var_disk="2"
