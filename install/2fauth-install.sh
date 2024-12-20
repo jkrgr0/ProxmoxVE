@@ -39,7 +39,7 @@ $STD mysql -u root -e "GRANT ALL ON $DB_NAME.* TO '$DB_USER'@'localhost'; FLUSH 
     echo "Database User: $DB_USER"
     echo "Database Password: $DB_PASS"
     echo "Database Name: $DB_NAME"
-} >> ~/$APP_NAME.creds
+} >> ~/${APPLICATION}.creds
 msg_ok "Set up Database"
 
 # Temp
