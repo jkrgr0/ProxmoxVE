@@ -3,7 +3,7 @@
 # Copyright (c) 2021-2024 community-scripts ORG
 # Author: jkrgr0
 # License: MIT
-# https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
+# Source: https://smallstep.com/certificates/index.html
 
 # Import Functions and Setup
 source /dev/stdin <<< "$FUNCTIONS_FILE_PATH"

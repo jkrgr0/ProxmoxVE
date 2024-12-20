@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source <(curl -s https://raw.githubusercontent.com/jkrgr0/ProxmoxVE/refs/heads/feature/step-ca/misc/build.func)
-# Copyright (c) 2024 jkrgr0
-# Author: jkrgr
+# Copyright (c) 2024 community-scripts ORG
+# Author: jkrgr0
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://smallstep.com/certificates/index.html
 
