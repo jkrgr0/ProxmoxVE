@@ -30,7 +30,7 @@ function update_script() {
     check_container_resources
 
     # Check if installation is present | -f for file, -d for folder
-    if [[ ! -d "/opt/${NSAPP}" ]]; then
+    if [[ ! -d "/opt/2fauth" ]]; then
         msg_error "No ${APP} Installation Found!"
         exit
     fi
@@ -45,21 +45,21 @@ function update_script() {
 
         # Creating Backup
         msg_info "Creating Backup"
-        mv "/opt/${NSAPP}" "/opt/${NSAPP}-backup"
-        # tar -czf "/opt/${NSAPP}_backup_$(date +%F).tar.gz" "/opt/${NSAPP}"
+        mv "/opt/2fauth" "/opt/2fauth-backup"
+        # tar -czf "/opt/2fauth_backup_$(date +%F).tar.gz" "/opt/2fauth"
         msg_ok "Backup Created"
 
         # Execute Update
         msg_info "Updating $APP to v${RELEASE}"
         wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
         unzip -q "${RELEASE}.zip"
-        mv "${APPLICATION}-${RELEASE}/" "/opt/${APPLICATION}"
-        mv "/opt/${NSAPP}-backup/.env" "/opt/${NSAPP}/.env"
-        mv "/opt/${NSAPP}-backup/storage" "/opt/${NSAPP}/storage"
-        cd "/opt/${NSAPP}" || return
+        mv "${APPLICATION}-${RELEASE//v}/" "/opt/${APPLICATION}"
+        mv "/opt/2fauth-backup/.env" "/opt/2fauth/.env"
+        mv "/opt/2fauth-backup/storage" "/opt/2fauth/storage"
+        cd "/opt/2fauth" || return
 
-        chown -R www-data: "/opt/${NSAPP}"
-        chmod -R 755 "/opt/${NSAPP}"
+        chown -R www-data: "/opt/2fauth"
+        chmod -R 755 "/opt/2fauth"
 
         export COMPOSER_ALLOW_SUPERUSER=1
         composer install --no-dev --prefer-source &>/dev/null
