@@ -22,7 +22,7 @@ $STD apt-get install -y \
   mc \
   nginx \
   composer \
-  php8.2-{bcmath,common,ctype,curl,fileinfo,gd,mbstring,mysql,xml,cli} \
+  php8.2-{bcmath,common,ctype,curl,fileinfo,fpm,gd,mbstring,mysql,xml,cli} \
   mariadb-server
 msg_ok "Installed Dependencies"
 
@@ -73,7 +73,7 @@ $STD composer install --no-dev --prefer-source --no-plugins --no-scripts
 $STD php artisan key:generate --force
 
 $STD php artisan migrate:refresh
-$STD php artisan passport:install
+$STD php artisan passport:install -q -n
 $STD php artisan storage:link
 $STD php artisan config:cache
 
