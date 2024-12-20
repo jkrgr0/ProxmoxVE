@@ -14,6 +14,9 @@ setting_up_container
 network_check
 update_os
 
+# Custom variables
+APP_PATH=/opt/2fauth
+
 # Installing Dependencies with the 3 core dependencies (curl;sudo;mc)
 msg_info "Installing Dependencies"
 $STD apt-get install -y \
@@ -42,16 +45,14 @@ $STD mysql -u root -e "GRANT ALL ON $DB_NAME.* TO '$DB_USER'@'localhost'; FLUSH 
 } >> ~/${APPLICATION}.creds
 msg_ok "Set up Database"
 
-# Temp
-
 # Setup App
 msg_info "Setup ${APPLICATION}"
 RELEASE=$(curl -s https://api.github.com/repos/Bubka/2FAuth/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) }')
 wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
 unzip -q "${RELEASE}.zip"
-mv "${APPLICATION}-${RELEASE}/" "/opt/${app}"
+mv "${APPLICATION}-${RELEASE//v}/" $APP_PATH
 
-cd "/opt/${app}" || return
+cd "$APP_PATH" || return
 cp .env.example .env
 IPADDRESS=$(hostname -I | awk '{print $1}')
 
@@ -63,8 +64,8 @@ sed -i -e "s|^APP_URL=.*|APP_URL=http://$IPADDRESS|" \
        -e "s|^DB_USERNAME=$|DB_USERNAME=$DB_USER|" \
        -e "s|^DB_PASSWORD=$|DB_PASSWORD=$DB_PASS|" .env
 
-chown -R www-data: "/opt/${app}"
-chmod -R 755 "/opt/${app}"
+chown -R www-data: $APP_PATH
+chmod -R 755 $APP_PATH
 
 export COMPOSER_ALLOW_SUPERUSER=1
 $STD composer update --no-plugins --no-scripts
@@ -85,7 +86,7 @@ msg_info "Configure Service"
 cat <<EOF >/etc/nginx/conf.d/2fauth.conf
 server {
         listen 80;
-        root /opt/${app}/public;
+        root $APP_PATH/public;
         server_name $IPADDRESS;
         index index.php;
         charset utf-8;
