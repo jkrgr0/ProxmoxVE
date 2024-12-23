@@ -68,7 +68,7 @@ function update_script() {
 
         # Cleaning up
         msg_info "Cleaning Up"
-        rm -rf "/opt/v${RELEASE}.zip"
+        rm -rf "v${RELEASE}.zip"
         $STD apt-get -y autoremove
         $STD apt-get -y autoclean
         msg_ok "Cleanup Completed"
