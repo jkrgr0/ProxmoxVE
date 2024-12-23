@@ -37,8 +37,8 @@ function update_script() {
 
     # Crawling the new version and checking whether an update is required
     RELEASE=$(curl -s https://api.github.com/repos/Bubka/2FAuth/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) }')
-    if [[ "${RELEASE}" != "$(cat /opt/${APP}_version.txt)" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
-        msg_info "Updating $APP to v${RELEASE}"
+    if [[ "${RELEASE}" != "$(cat /opt/2fauth_version.txt)" ]] || [[ ! -f /opt/2fauth_version.txt ]]; then
+        msg_info "Updating $APP to ${RELEASE}"
 
         apt-get update &>/dev/null
         apt-get -y upgrade &>/dev/null
