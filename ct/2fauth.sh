@@ -52,10 +52,11 @@ function update_script() {
         msg_info "Updating $APP to v${RELEASE}"
         wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
         unzip -q "${RELEASE}.zip"
-        mv "${APPLICATION}-${RELEASE//v}/" "/opt/${APPLICATION}"
+        mv "2FAuth-${RELEASE//v}/" "/opt/2fauth"
         mv "/opt/2fauth-backup/.env" "/opt/2fauth/.env"
         mv "/opt/2fauth-backup/storage" "/opt/2fauth/storage"
         cd "/opt/2fauth" || return
+        msg_ok "Updated $APP to v${RELEASE}"
 
         chown -R www-data: "/opt/2fauth"
         chmod -R 755 "/opt/2fauth"
@@ -74,7 +75,7 @@ function update_script() {
         msg_ok "Cleanup Completed"
 
         # Last Action
-        echo "${RELEASE}" >/opt/${APP}_version.txt
+        echo "${RELEASE}" >/opt/2fauth_version.txt
         msg_ok "Update Successful"
     else
         msg_ok "No update required. ${APP} is already at v${RELEASE}"
