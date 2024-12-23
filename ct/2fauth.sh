@@ -73,9 +73,9 @@ function update_script() {
 
         # Last Action
         echo "${RELEASE}" >/opt/2fauth_version.txt
-        msg_ok "Updated $APP to v${RELEASE}"
+        msg_ok "Updated $APP to ${RELEASE}"
     else
-        msg_ok "No update required. ${APP} is already at v${RELEASE}"
+        msg_ok "No update required. ${APP} is already at ${RELEASE}"
     fi
     exit
 }
