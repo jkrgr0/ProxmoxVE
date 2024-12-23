@@ -38,7 +38,7 @@ function update_script() {
     # Crawling the new version and checking whether an update is required
     RELEASE=$(curl -s https://api.github.com/repos/Bubka/2FAuth/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) }')
     if [[ "${RELEASE}" != "$(cat /opt/${APP}_version.txt)" ]] || [[ ! -f /opt/${APP}_version.txt ]]; then
-        msg_info "Updating $APP"
+        msg_info "Updating $APP to v${RELEASE}"
 
         apt-get update &>/dev/null
         apt-get -y upgrade &>/dev/null
@@ -49,14 +49,12 @@ function update_script() {
         msg_ok "Backup Created"
 
         # Execute Update
-        msg_info "Updating $APP to v${RELEASE}"
         wget -q "https://github.com/Bubka/2FAuth/archive/refs/tags/${RELEASE}.zip"
         unzip -q "${RELEASE}.zip"
         mv "2FAuth-${RELEASE//v}/" "/opt/2fauth"
         mv "/opt/2fauth-backup/.env" "/opt/2fauth/.env"
         mv "/opt/2fauth-backup/storage" "/opt/2fauth/storage"
         cd "/opt/2fauth" || return
-        msg_ok "Updated $APP to v${RELEASE}"
 
         chown -R www-data: "/opt/2fauth"
         chmod -R 755 "/opt/2fauth"
@@ -65,7 +63,6 @@ function update_script() {
         composer install --no-dev --prefer-source &>/dev/null
 
         php artisan 2fauth:install
-        msg_ok "Updated $APP to v${RELEASE}"
 
         # Cleaning up
         msg_info "Cleaning Up"
@@ -76,7 +73,7 @@ function update_script() {
 
         # Last Action
         echo "${RELEASE}" >/opt/2fauth_version.txt
-        msg_ok "Update Successful"
+        msg_ok "Updated $APP to v${RELEASE}"
     else
         msg_ok "No update required. ${APP} is already at v${RELEASE}"
     fi
