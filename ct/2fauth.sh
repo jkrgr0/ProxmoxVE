@@ -46,7 +46,6 @@ function update_script() {
         # Creating Backup
         msg_info "Creating Backup"
         mv "/opt/2fauth" "/opt/2fauth-backup"
-        # tar -czf "/opt/2fauth_backup_$(date +%F).tar.gz" "/opt/2fauth"
         msg_ok "Backup Created"
 
         # Execute Update
